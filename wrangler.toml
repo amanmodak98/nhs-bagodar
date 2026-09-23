@@ -1,0 +1,19 @@
+name = "nhs-bagodar"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "out"
+
+# D1 database binding — drives admin /api/admin/* CRUD
+[[d1_databases]]
+binding = "DB"
+database_name = "nhs-bagodar-db"
+database_id = "e8f17be8-fdaa-447a-8eb4-616a0b3b1d75"
+
+# R2 bucket binding — for circular / disclosure PDFs in production
+[[r2_buckets]]
+binding = "FILES"
+bucket_name = "nhs-bagodar-files"
+preview_bucket_name = "nhs-bagodar-files"
+
+# Environment variables (set via `wrangler pages secret put NAME <name>`)
+# ADMIN_USERNAME, ADMIN_PASSWORD, ADMIN_SESSION_SECRET
