@@ -1,8 +1,12 @@
-import type { Notice, Faculty, Disclosure, Inquiry } from './types';
+import type { Notice, Disclosure, Inquiry } from './types';
 
 /**
  * Mock seed data — replaces D1 reads in development when no DB is configured.
  * Real production reads/writes go through lib/db.ts which routes to D1.
+ *
+ * Faculty is intentionally not seeded here: it must be managed exclusively
+ * via /admin/faculty. The admin panel is the only source of truth for
+ * faculty records.
  */
 
 export const SEED_NOTICES: Notice[] = [
@@ -79,89 +83,9 @@ export const SEED_NOTICES: Notice[] = [
   },
 ];
 
-export const SEED_FACULTY: Faculty[] = [
-  {
-    id: 1,
-    name: 'Sri Rajesh Kumar Mahto',
-    designation: 'Principal',
-    qualification: 'M.A. (English), B.Ed.',
-    subject: 'English',
-    joinedYear: 2021,
-    orderIndex: 1,
-  },
-  {
-    id: 2,
-    name: 'Smt. Prabha Devi',
-    designation: 'Vice Principal',
-    qualification: 'M.A. (Hindi), B.Ed.',
-    subject: 'Hindi',
-    joinedYear: 2021,
-    orderIndex: 2,
-  },
-  {
-    id: 3,
-    name: 'Sri Sanjay Kumar',
-    designation: 'Senior Teacher',
-    qualification: 'M.Sc. (Mathematics), B.Ed.',
-    subject: 'Mathematics',
-    joinedYear: 2022,
-    orderIndex: 3,
-  },
-  {
-    id: 4,
-    name: 'Smt. Asha Kumari',
-    designation: 'TGT',
-    qualification: 'M.Sc. (Physics), B.Ed.',
-    subject: 'Science',
-    joinedYear: 2022,
-    orderIndex: 4,
-  },
-  {
-    id: 5,
-    name: 'Sri Mukesh Ram',
-    designation: 'TGT',
-    qualification: 'M.A. (History), B.Ed.',
-    subject: 'Social Science',
-    joinedYear: 2023,
-    orderIndex: 5,
-  },
-  {
-    id: 6,
-    name: 'Smt. Neelam Devi',
-    designation: 'PRT',
-    qualification: 'B.A., D.El.Ed.',
-    subject: 'Primary',
-    joinedYear: 2021,
-    orderIndex: 6,
-  },
-  {
-    id: 7,
-    name: 'Sri Vikash Kumar',
-    designation: 'Computer Instructor',
-    qualification: 'B.Tech (CSE), PGDCA',
-    subject: 'Computer',
-    joinedYear: 2023,
-    orderIndex: 7,
-  },
-  {
-    id: 8,
-    name: 'Smt. Sunita Oraon',
-    designation: 'Hostel Warden',
-    qualification: 'B.A.',
-    subject: '—',
-    joinedYear: 2022,
-    orderIndex: 8,
-  },
-  {
-    id: 9,
-    name: 'Sri Birsa Munda',
-    designation: 'Administrative Officer',
-    qualification: 'B.Com.',
-    subject: '—',
-    joinedYear: 2022,
-    orderIndex: 9,
-  },
-];
+// SEED_FACULTY intentionally omitted — faculty must be added through
+// /admin/faculty; the data layer keeps an empty array until the admin
+// populates it. See lib/db.ts and lib/faculty-client.ts.
 
 export const SEED_DISCLOSURES: Disclosure[] = [
   {

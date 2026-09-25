@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { SCHOOL, PRINCIPAL, COMMITMENTS, TIMELINE } from '@/lib/content';
+import { SCHOOL, COMMITMENTS, TIMELINE } from '@/lib/content';
 import { Photo } from '@/components/ui/Photo';
 import { Logo } from '@/components/ui/Logo';
 import { imgUrl } from '@/lib/images';
+import { PrincipalSpotlight } from '@/components/site/PrincipalSpotlight';
 
 export const metadata = {
   title: 'About the school',
@@ -45,27 +46,9 @@ export default function AboutPage() {
       </header>
 
       {/* Principal */}
-      <section className="border-b border-rule">
-        <div className="max-w-edition mx-auto px-6 py-16 md:py-22">
-          <div className="grid grid-cols-12 gap-10">
-            <aside className="col-span-12 md:col-span-4">
-              <div className="eyebrow">From the principal</div>
-              <h2 className="font-display text-2xl text-ink mt-3">{PRINCIPAL.name}</h2>
-              <p className="text-xs uppercase tracking-institutional text-amber-600 mt-1">
-                {PRINCIPAL.designation}
-              </p>
-              <p className="text-sm text-slate-600 mt-3">{PRINCIPAL.qualification}</p>
-              <p className="text-xs text-slate-500 mt-1">Joined {PRINCIPAL.joined}</p>
-            </aside>
-            <div className="col-span-12 md:col-span-8 max-w-reading">
-              <blockquote className="font-display italic text-2xl text-ink leading-snug border-l-4 border-amber-500 pl-6 py-2">
-                "{PRINCIPAL.message}"
-              </blockquote>
-              <p className="mt-6 text-slate-700">
-                The principal is reachable in person at the school office on weekdays between 09:00 and 11:00. For matters requiring more time, write to {SCHOOL.email}.
-              </p>
-            </div>
-          </div>
+      <section id="principal" className="border-b border-rule">
+        <div className="max-w-edition mx-auto px-6 py-16 md:py-22 scroll-mt-24">
+          <PrincipalSpotlight variant="about" />
         </div>
       </section>
 

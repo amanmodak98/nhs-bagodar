@@ -74,3 +74,21 @@ export interface Inquiry {
   status: InquiryStatus;
   createdAt: string;
 }
+
+export interface Principal {
+  id: 1;
+  name: string;
+  nameHi?: string | null;
+  designation: string;
+  designationHi?: string | null;
+  qualification?: string | null;
+  joinedYear?: number | null;
+  photoUrl?: string | null;
+  messageEn?: string | null;
+  messageHi?: string | null;
+  quote2En?: string | null;
+  quote2Hi?: string | null;
+  quote3En?: string | null;
+  quote3Hi?: string | null;
+  updatedAt?: string;
+}

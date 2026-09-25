@@ -9,23 +9,48 @@
  * and D1 — no API change when switching to D1 in production.
  */
 
-import type { Notice, Faculty, Disclosure, Inquiry, NoticeCategory, InquiryStatus } from './types';
-import { SEED_NOTICES, SEED_FACULTY, SEED_DISCLOSURES, SEED_INQUIRIES } from './seed';
+import type { Notice, Faculty, Disclosure, Inquiry, NoticeCategory, InquiryStatus, Principal } from './types';
+import { SEED_NOTICES, SEED_DISCLOSURES, SEED_INQUIRIES } from './seed';
 
 const HAS_D1 = !!process.env.CLOUDFLARE_D1_DATABASE_ID;
 
-// In-memory store so admin writes persist across requests during dev
+// Default principal record — used only as the in-memory placeholder until
+// the admin populates it via /admin/principal. No deployment ships with
+// a hardcoded principal.
+const DEFAULT_PRINCIPAL: Principal = {
+  id: 1,
+  name: 'Principal',
+  nameHi: '',
+  designation: 'Principal',
+  designationHi: '',
+  qualification: '',
+  joinedYear: new Date().getFullYear(),
+  photoUrl: '',
+  messageEn: '',
+  messageHi: '',
+  quote2En: '',
+  quote2Hi: '',
+  quote3En: '',
+  quote3Hi: '',
+  updatedAt: '',
+};
+
+// In-memory store so admin writes persist across requests during dev.
+// Faculty and Principal start at their empty/default state: the admin
+// panel is the only source of truth for those records.
 let notices: Notice[] = [...SEED_NOTICES];
-let faculty: Faculty[] = [...SEED_FACULTY];
+let faculty: Faculty[] = [];
 let disclosures: Disclosure[] = [...SEED_DISCLOSURES];
 let inquiries: Inquiry[] = [...SEED_INQUIRIES];
 
 let idCounter = {
   notices: SEED_NOTICES.length + 100,
-  faculty: SEED_FACULTY.length + 100,
+  faculty: 100,
   disclosures: SEED_DISCLOSURES.length + 100,
   inquiries: SEED_INQUIRIES.length + 100,
 };
+
+let principalRecord: Principal = { ...DEFAULT_PRINCIPAL };
 
 /* ------------------------------ Notices ------------------------------ */
 
@@ -224,4 +249,77 @@ async function d1Execute(sql: string, params: (string | number | null)[] = []): 
   const stmt = db.prepare(sql);
   const bound = params.length ? stmt.bind(...params) : stmt;
   await bound.run();
+}
+
+/* ------------------------------ Principal ------------------------------ */
+
+export async function getPrincipal(): Promise<Principal | null> {
+  if (HAS_D1) {
+    const rows = await d1Query<Principal>(
+      "SELECT id, name, name_hi as nameHi, designation, designation_hi as designationHi, qualification, joined_year as joinedYear, photo_url as photoUrl, message_en as messageEn, message_hi as messageHi, quote_2_en as quote2En, quote_2_hi as quote2Hi, quote_3_en as quote3En, quote_3_hi as quote3Hi, updated_at as updatedAt FROM principal WHERE id = 1"
+    );
+    if (rows.length > 0) return rows[0];
+    // Empty D1 → fall back to a placeholder so the page renders structure.
+    return { ...DEFAULT_PRINCIPAL };
+  }
+  return principalRecord;
+}
+
+export async function upsertPrincipal(input: Omit<Principal, 'id' | 'updatedAt'>): Promise<void> {
+  if (HAS_D1) {
+    await d1Execute(
+      `INSERT INTO principal (
+        id, name, name_hi, designation, designation_hi, qualification, joined_year,
+        photo_url, message_en, message_hi, quote_2_en, quote_2_hi, quote_3_en, quote_3_hi, updated_at
+      ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      ON CONFLICT(id) DO UPDATE SET
+        name = excluded.name,
+        name_hi = excluded.name_hi,
+        designation = excluded.designation,
+        designation_hi = excluded.designation_hi,
+        qualification = excluded.qualification,
+        joined_year = excluded.joined_year,
+        photo_url = excluded.photo_url,
+        message_en = excluded.message_en,
+        message_hi = excluded.message_hi,
+        quote_2_en = excluded.quote_2_en,
+        quote_2_hi = excluded.quote_2_hi,
+        quote_3_en = excluded.quote_3_en,
+        quote_3_hi = excluded.quote_3_hi,
+        updated_at = datetime('now')`,
+      [
+        String(input.name || ''),
+        input.nameHi || null,
+        String(input.designation || 'Principal'),
+        input.designationHi || null,
+        input.qualification || null,
+        Number(input.joinedYear) || null,
+        input.photoUrl || null,
+        input.messageEn || null,
+        input.messageHi || null,
+        input.quote2En || null,
+        input.quote2Hi || null,
+        input.quote3En || null,
+        input.quote3Hi || null,
+      ],
+    );
+    return;
+  }
+  principalRecord = {
+    id: 1,
+    name: String(input.name || ''),
+    nameHi: input.nameHi ?? null,
+    designation: String(input.designation || 'Principal'),
+    designationHi: input.designationHi ?? null,
+    qualification: input.qualification ?? null,
+    joinedYear: Number(input.joinedYear) || null,
+    photoUrl: input.photoUrl ?? null,
+    messageEn: input.messageEn ?? null,
+    messageHi: input.messageHi ?? null,
+    quote2En: input.quote2En ?? null,
+    quote2Hi: input.quote2Hi ?? null,
+    quote3En: input.quote3En ?? null,
+    quote3Hi: input.quote3Hi ?? null,
+    updatedAt: new Date().toISOString(),
+  };
 }

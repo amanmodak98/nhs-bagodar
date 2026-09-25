@@ -14,33 +14,75 @@ export function FacultyManager({ initial }: { initial: Faculty[] }) {
     name: '', designation: 'TGT' as FacultyDesignation, qualification: '',
     subject: '', joinedYear: new Date().getFullYear(), orderIndex: 99, imageUrl: '',
   });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const canSubmit = !!draft.name.trim() && !!draft.qualification.trim() && !saving;
 
   async function add() {
-    const res = await fetch('/api/admin/faculty', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        ...draft,
+    setError(null);
+    if (!draft.name.trim() || !draft.qualification.trim()) {
+      setError('Name and qualification are required.');
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch('/api/admin/faculty', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          name: draft.name.trim(),
+          designation: draft.designation,
+          qualification: draft.qualification.trim(),
+          subject: draft.subject.trim(),
+          joinedYear: Number(draft.joinedYear) || new Date().getFullYear(),
+          orderIndex: Number(draft.orderIndex) || 99,
+          imageUrl: draft.imageUrl || undefined,
+        }),
+      });
+      const data = await res.json().catch(() => ({} as any));
+      if (!res.ok) {
+        throw new Error(data.error || `Add failed (${res.status})`);
+      }
+      if (!data.id) throw new Error('Server did not return an id');
+      const created: Faculty = {
+        id: data.id,
+        name: draft.name.trim(),
+        designation: draft.designation,
+        qualification: draft.qualification.trim(),
+        subject: draft.subject.trim(),
+        joinedYear: Number(draft.joinedYear) || new Date().getFullYear(),
+        orderIndex: Number(draft.orderIndex) || 99,
         imageUrl: draft.imageUrl || undefined,
-      }),
-    });
-    const data = await res.json();
-    setItems((p) => [...p, { ...draft, id: data.id }]);
-    setDraft({ ...draft, name: '', qualification: '', subject: '', imageUrl: '' });
-    router.refresh();
+      };
+      setItems((p) => [...p, created]);
+      setDraft((d) => ({ ...d, name: '', qualification: '', subject: '', imageUrl: '' }));
+      router.refresh();
+    } catch (e: any) {
+      setError(e?.message || 'Failed to add faculty.');
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function remove(id: number) {
     if (!confirm('Remove this faculty entry?')) return;
+    const snapshot = items;
     setItems((p) => p.filter((x) => x.id !== id));
-    await fetch('/api/admin/faculty', {
-      method: 'DELETE',
-      headers: { 'content-type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ id }),
-    });
-    router.refresh();
+    try {
+      const r = await fetch('/api/admin/faculty', {
+        method: 'DELETE',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ id }),
+      });
+      if (!r.ok) throw new Error(`Delete failed (${r.status})`);
+      router.refresh();
+    } catch (e: any) {
+      setItems(snapshot);
+      setError(e?.message || 'Failed to delete.');
+    }
   }
 
   return (
@@ -49,8 +91,15 @@ export function FacultyManager({ initial }: { initial: Faculty[] }) {
         <h2 className="font-display text-lg text-ink mb-4">Add faculty</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs uppercase tracking-institutional text-amber-600 font-semibold">Name</label>
-            <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className="input-rule mt-1" />
+            <label className="block text-xs uppercase tracking-institutional text-amber-600 font-semibold">
+              Name <span className="text-amber-700">*</span>
+            </label>
+            <input
+              value={draft.name}
+              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+              className="input-rule mt-1"
+              placeholder="e.g. Sri Rajesh Kumar Mahto"
+            />
           </div>
           <div>
             <label className="block text-xs uppercase tracking-institutional text-amber-600 font-semibold">Designation</label>
@@ -59,12 +108,24 @@ export function FacultyManager({ initial }: { initial: Faculty[] }) {
             </select>
           </div>
           <div>
-            <label className="block text-xs uppercase tracking-institutional text-amber-600 font-semibold">Qualification</label>
-            <input value={draft.qualification} onChange={(e) => setDraft({ ...draft, qualification: e.target.value })} className="input-rule mt-1" />
+            <label className="block text-xs uppercase tracking-institutional text-amber-600 font-semibold">
+              Qualification <span className="text-amber-700">*</span>
+            </label>
+            <input
+              value={draft.qualification}
+              onChange={(e) => setDraft({ ...draft, qualification: e.target.value })}
+              className="input-rule mt-1"
+              placeholder="e.g. M.A. (English), B.Ed."
+            />
           </div>
           <div>
             <label className="block text-xs uppercase tracking-institutional text-amber-600 font-semibold">Subject</label>
-            <input value={draft.subject} onChange={(e) => setDraft({ ...draft, subject: e.target.value })} className="input-rule mt-1" />
+            <input
+              value={draft.subject}
+              onChange={(e) => setDraft({ ...draft, subject: e.target.value })}
+              className="input-rule mt-1"
+              placeholder="e.g. Mathematics"
+            />
           </div>
           <div>
             <label className="block text-xs uppercase tracking-institutional text-amber-600 font-semibold">Joined</label>
@@ -101,7 +162,22 @@ export function FacultyManager({ initial }: { initial: Faculty[] }) {
             </p>
           </div>
         </div>
-        <button onClick={add} disabled={!draft.name || !draft.qualification} className="btn-primary mt-4">Add faculty</button>
+        {error && (
+          <div
+            role="alert"
+            className="mt-3 text-sm text-amber-800 bg-amber-50 border border-amber-200 px-3 py-2"
+          >
+            {error}
+          </div>
+        )}
+        <div className="mt-4 flex items-center gap-3">
+          <button onClick={add} disabled={!canSubmit} className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed">
+            {saving ? 'Adding…' : 'Add faculty'}
+          </button>
+          <span className="text-xs text-slate-500">
+            Updates <code className="font-mono">/api/admin/faculty</code> on D1.
+          </span>
+        </div>
       </section>
 
       <section>
@@ -119,7 +195,10 @@ export function FacultyManager({ initial }: { initial: Faculty[] }) {
               </tr>
             </thead>
             <tbody>
-              {items.sort((a, b) => a.orderIndex - b.orderIndex).map((f, i) => (
+              {items
+                .slice()
+                .sort((a, b) => a.orderIndex - b.orderIndex)
+                .map((f, i) => (
                 <tr key={f.id} className="border-b border-rule-soft">
                   <td className="py-2 pr-3 text-amber-600 font-display">{String(i + 1).padStart(2, '0')}</td>
                   <td className="py-2 pr-3 text-ink">

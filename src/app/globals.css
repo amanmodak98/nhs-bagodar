@@ -257,6 +257,11 @@ h1, h2, h3 {
     color: var(--slate);
     opacity: 0.55;
   }
+  textarea.input-rule {
+    resize: vertical;
+    min-height: 4.5rem;
+    line-height: 1.55;
+  }
 
   /* Marquee animation for the announcement bar */
   .marquee-track {

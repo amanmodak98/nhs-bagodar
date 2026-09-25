@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { SCHOOL, FACILITIES, PROGRAMS, PRINCIPAL, COMMITMENTS, TIMELINE, SCHOLARSHIPS, TESTIMONIALS, BUS_ROUTES, PUBLIC_NOTICES_SAMPLE } from '@/lib/content';
+import { SCHOOL, FACILITIES, PROGRAMS, COMMITMENTS, TIMELINE, SCHOLARSHIPS, TESTIMONIALS, BUS_ROUTES, PUBLIC_NOTICES_SAMPLE } from '@/lib/content';
 import { HERO_IMAGES, imgUrl, getImagesForSection } from '@/lib/images';
 import { listActiveNotices } from '@/lib/db';
 import { NoticeTicker } from '@/components/site/NoticeTicker';
@@ -12,6 +12,8 @@ import { HeroCarousel } from '@/components/site/HeroCarousel';
 import { CountUp } from '@/components/site/CountUp';
 import { TestimonialCarousel } from '@/components/site/TestimonialCarousel';
 import { Reveal } from '@/components/site/Reveal';
+import { FacultySpotlight } from '@/components/site/FacultySpotlight';
+import { PrincipalSpotlight } from '@/components/site/PrincipalSpotlight';
 
 export default async function HomePage() {
   const notices = await listActiveNotices();
@@ -237,29 +239,31 @@ export default async function HomePage() {
       {/* ============================== PRINCIPAL ============================== */}
       <section className="bg-sand-100 border-b border-sand-200">
         <div className="max-w-edition mx-auto px-6 py-16 md:py-20">
-          <Reveal className="grid grid-cols-12 gap-10 items-center">
-            <aside className="col-span-12 md:col-span-4">
-              <div className="rule-accent mb-4" />
-              <div className="eyebrow">From the principal</div>
-              <h2 className="font-display text-3xl text-ink mt-3">{PRINCIPAL.name}</h2>
-              <p className="hindi-sub text-sm text-slate-600 mt-1">{PRINCIPAL.nameHi}</p>
-              <p className="text-xs uppercase tracking-institutional text-amber-600 mt-2">
-                {PRINCIPAL.designation} · since {PRINCIPAL.joinedYear}
-              </p>
-              <p className="text-sm text-slate-600 mt-3">{PRINCIPAL.qualification}</p>
-            </aside>
-            <blockquote className="col-span-12 md:col-span-8 max-w-reading">
-              <p className="font-display italic text-2xl text-ink leading-snug">
-                "{PRINCIPAL.message}"
-              </p>
-              <p className="hindi-body text-base text-slate-700 mt-4 italic leading-relaxed">
-                हमने राष्ट्रीय उच्च विद्यालय की स्थापना एक ही वादे के साथ की — कि इस क्षेत्र का कोई भी बच्चा शुल्क के कारण पीछे नहीं रहेगा।
-              </p>
-              <Link href="/about#principal" className="btn-link mt-5">
-                Read the full address →
-              </Link>
-            </blockquote>
+          <Reveal>
+            <PrincipalSpotlight variant="home" />
           </Reveal>
+        </div>
+      </section>
+
+      {/* ============================== FACULTY SPOTLIGHT ============================== */}
+      <section className="bg-paper border-b border-rule">
+        <div className="max-w-edition mx-auto px-6 py-16 md:py-20">
+          <div className="flex items-end justify-between mb-10 gap-4 flex-wrap">
+            <div>
+              <div className="eyebrow">Faculty · शिक्षक वर्ग</div>
+              <h2 className="font-display text-3xl md:text-4xl text-ink mt-3">
+                Who teaches here.
+              </h2>
+              <p className="hindi-sub text-base text-slate-600 mt-2">
+                हमारे शिक्षक वर्ग
+              </p>
+            </div>
+            <Link href="/faculty" className="btn-link">
+              See full directory →
+            </Link>
+          </div>
+
+          <FacultySpotlight count={6} />
         </div>
       </section>
 

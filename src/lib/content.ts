@@ -172,17 +172,10 @@ export const PROGRAMS = [
 
 /* -------------------------------- Principal ------------------------------- */
 
-export const PRINCIPAL = {
-  name: 'Sri Rajesh Kumar Mahto',
-  nameHi: 'श्री राजेश कुमार महतो',
-  designation: 'Principal',
-  designationHi: 'प्रधानाचार्य',
-  qualification: 'M.A. (English Literature), B.Ed.',
-  joined: 2021,
-  joinedYear: 2021,
-  image: 'chief-guest-welcome-bouquet-presentation',
-  message: `We started National High School in 2021 with one promise — that no child in this region will be held back because of fee. That promise still stands. We will keep our syllabus on time, our classrooms small enough for a teacher to know each child by name, and our admissions open to every family that walks through our gate.`,
-} as const;
+// PRINCIPAL is intentionally NOT exported from content.ts — principal
+// details and quotes are managed exclusively via /admin/principal and
+// served by the data layer in lib/db.ts + the public /api/principal route.
+// See components/admin/PrincipalManager.tsx and components/site/PrincipalSpotlight.tsx.
 
 /* ------------------------------- Scholarships ----------------------------- */
 

@@ -27,6 +27,26 @@ CREATE TABLE IF NOT EXISTS faculty (
 );
 CREATE INDEX IF NOT EXISTS idx_faculty_order ON faculty(order_index);
 
+-- Principal singleton — id is locked to 1.
+-- Managed exclusively via /admin/principal; not hardcoded anywhere in the app.
+CREATE TABLE IF NOT EXISTS principal (
+  id              INTEGER PRIMARY KEY CHECK (id = 1),
+  name            TEXT NOT NULL,
+  name_hi         TEXT,
+  designation     TEXT NOT NULL,
+  designation_hi  TEXT,
+  qualification   TEXT,
+  joined_year     INTEGER,
+  photo_url       TEXT,
+  message_en      TEXT,
+  message_hi      TEXT,
+  quote_2_en      TEXT,
+  quote_2_hi      TEXT,
+  quote_3_en      TEXT,
+  quote_3_hi      TEXT,
+  updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS disclosures (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,
   document_title  TEXT NOT NULL,

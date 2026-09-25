@@ -1,21 +1,24 @@
 /**
  * Client-side faculty fetcher — used by /faculty page at build time.
- * Falls back to mock data when the admin API isn't reachable (offline build).
+ *
+ * Faculty is managed exclusively via /admin/faculty — there is no fallback
+ * seed. If the admin endpoint returns nothing (or is unreachable during
+ * a build that hasn't been published yet), the page renders empty.
  */
 
-import { SEED_FACULTY } from '@/lib/seed';
+import type { Faculty } from './types';
 
-export async function listFacultyClient() {
+export async function listFacultyClient(): Promise<Faculty[]> {
   try {
     const base = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     const r = await fetch(`${base}/api/admin/faculty`, { cache: 'no-store' });
-    if (!r.ok) throw new Error('not ok');
+    if (!r.ok) return [];
     const data = await r.json();
-    if (Array.isArray(data.items) && data.items.length > 0) {
-      return data.items.sort((a: any, b: any) => a.orderIndex - b.orderIndex);
+    if (Array.isArray(data.items)) {
+      return data.items.sort((a: Faculty, b: Faculty) => a.orderIndex - b.orderIndex);
     }
   } catch {
-    /* fall through to seed */
+    /* fall through to empty */
   }
-  return SEED_FACULTY;
+  return [];
 }

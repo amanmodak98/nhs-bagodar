@@ -29,6 +29,7 @@ const NAV: NavItem[] = [
       { href: '/academics', label: 'Programme Stages', labelHi: 'शिक्षा स्तर' },
       { href: '/academics/calendar', label: 'Academic Calendar', labelHi: 'शैक्षणिक कैलेंडर' },
       { href: '/academics/syllabus', label: 'Syllabus', labelHi: 'पाठ्यक्रम' },
+      { href: '/faculty', label: 'Faculty Directory', labelHi: 'शिक्षक सूची' },
     ],
   },
   {
