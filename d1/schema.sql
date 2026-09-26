@@ -27,7 +27,42 @@ CREATE TABLE IF NOT EXISTS faculty (
 );
 CREATE INDEX IF NOT EXISTS idx_faculty_order ON faculty(order_index);
 
+-- Facilities — managed via /admin/facilities; not hardcoded anywhere else.
+CREATE TABLE IF NOT EXISTS facilities (
+  id              TEXT PRIMARY KEY,        -- slug, e.g. 'smart-classroom'
+  name            TEXT NOT NULL,            -- English
+  name_hi         TEXT,                     -- Hindi
+  description     TEXT NOT NULL,            -- English body
+  description_hi  TEXT,                     -- Hindi body
+  image_stem      TEXT,                     -- /images/{stem}.jpeg from /public/images/
+  image_url       TEXT,                     -- alt: full URL (R2 upload etc.)
+  established     TEXT,                     -- year or short text, e.g. '2022'
+  order_index     INTEGER NOT NULL DEFAULT 0,
+  updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Gallery — managed via /admin/gallery.
+-- 'stem' is the unique key (matches the file in /public/images/ for legacy
+-- images, or 'r2:<key>' for admin-uploaded ones). When 'r2_key' is set,
+-- the public URL is /api/files/{r2_key} instead of /images/{stem}.jpeg.
+CREATE TABLE IF NOT EXISTS gallery_images (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  stem            TEXT UNIQUE NOT NULL,
+  r2_key          TEXT,
+  category        TEXT NOT NULL CHECK (category IN ('independence-day','annual-function','flag-ceremony','leadership','life-at-nhs')),
+  caption         TEXT NOT NULL DEFAULT '',
+  caption_hi      TEXT,
+  is_published    INTEGER NOT NULL DEFAULT 1,
+  order_index     INTEGER NOT NULL DEFAULT 0,
+  created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_gallery_published ON gallery_images(is_published, order_index);
+CREATE INDEX IF NOT EXISTS idx_gallery_category ON gallery_images(category, order_index);
+
 -- Principal singleton — id is locked to 1.
+-- Managed exclusively via /admin/principal; not hardcoded anywhere in the app.
+CREATE TABLE IF NOT EXISTS principal (
 -- Managed exclusively via /admin/principal; not hardcoded anywhere in the app.
 CREATE TABLE IF NOT EXISTS principal (
   id              INTEGER PRIMARY KEY CHECK (id = 1),

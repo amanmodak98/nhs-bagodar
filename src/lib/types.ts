@@ -92,3 +92,36 @@ export interface Principal {
   quote3Hi?: string | null;
   updatedAt?: string;
 }
+
+export interface Facility {
+  id: string;
+  name: string;
+  nameHi?: string | null;
+  description: string;
+  descriptionHi?: string | null;
+  imageStem?: string | null;
+  imageUrl?: string | null;
+  established?: string | null;
+  orderIndex: number;
+  updatedAt?: string;
+}
+
+export type GalleryCategory =
+  | 'independence-day'
+  | 'annual-function'
+  | 'flag-ceremony'
+  | 'leadership'
+  | 'life-at-nhs';
+
+export interface GalleryImage {
+  id?: number;
+  stem: string;
+  r2Key?: string | null;
+  category: GalleryCategory;
+  caption: string;
+  captionHi?: string | null;
+  isPublished: boolean;
+  orderIndex: number;
+  createdAt?: string;
+  updatedAt?: string;
+}

@@ -74,64 +74,10 @@ export const COUNTERS = [
   { value: 4, suffix: '', label: 'Bus routes', detail: 'Bagodar · Aura · Dumri · Giridih' },
 ] as const;
 
-/* ------------------------------ Facilities ------------------------------- */
-
-export const FACILITIES = [
-  {
-    id: 'smart-classroom',
-    name: 'Smart Digital Classrooms',
-    nameHi: 'स्मार्ट डिजिटल कक्षाएँ',
-    description:
-      'Each classroom equipped with a smart display, audio system, and internet access. Concepts are taught visually before blackboard work.',
-    image: 'annual-function-stage-boy-mic-orange-shirt-01',
-    established: '2022',
-  },
-  {
-    id: 'computer-lab',
-    name: 'Modern Computer Lab',
-    nameHi: 'आधुनिक कंप्यूटर प्रयोगशाला',
-    description:
-      'A dedicated computer lab with broadband internet, used from Class 3 onwards. Basic typing, file handling, and online research are taught at the primary stage itself.',
-    image: 'annual-function-stage-boy-green-uniform-mic-01',
-    established: '2023',
-  },
-  {
-    id: 'hostel',
-    name: 'Separate Boys & Girls Hostel',
-    nameHi: 'अलग-अलग छात्रावास',
-    description:
-      'Supervised hostel facility with warden, meals, study hours, and weekend leave protocol. Available for Classes 3 onwards on application.',
-    image: 'independence-day-school-girls-portrait',
-    established: '2023',
-  },
-  {
-    id: 'bus',
-    name: 'School Bus Network',
-    nameHi: 'विद्यालय बस सेवा',
-    description:
-      'GPS-tracked buses on Bagodar, Dama, Aura, Giridih, and Dumri routes. Drivers and conductors are background-verified. Live pickup and drop timings are issued term-wise.',
-    image: 'independence-day-rally-students-marching',
-    established: '2022',
-  },
-  {
-    id: 'library',
-    name: 'Reading Room & Library',
-    nameHi: 'पुस्तकालय एवं वाचनालय',
-    description:
-      'A bilingual reading room stocked with picture books, NCERT and JAC textbooks, newspapers, and reference material. Open during all school hours.',
-    image: 'student-speech-girl-green-uniform',
-    established: '2022',
-  },
-  {
-    id: 'sports',
-    name: 'Sports & Drill Ground',
-    nameHi: 'खेल मैदान',
-    description:
-      'Open assembly ground used for Independence Day and Republic Day parades, drill practice, and inter-house sports.',
-    image: 'independence-day-rally-wide-shot-01',
-    established: '2022',
-  },
-] as const;
+// FACILITIES is intentionally NOT exported from content.ts — facilities
+// are managed exclusively via /admin/facilities and served by the data layer
+// in lib/db.ts + the public /api/facilities route.
+// See components/admin/FacilityManager.tsx and components/site/FacilitiesList.tsx.
 
 /* -------------------------------- Programs ------------------------------- */
 

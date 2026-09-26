@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { SCHOOL, FACILITIES, PROGRAMS, COMMITMENTS, TIMELINE, SCHOLARSHIPS, TESTIMONIALS, BUS_ROUTES, PUBLIC_NOTICES_SAMPLE } from '@/lib/content';
+import { SCHOOL, PROGRAMS, COMMITMENTS, TIMELINE, SCHOLARSHIPS, TESTIMONIALS, BUS_ROUTES, PUBLIC_NOTICES_SAMPLE } from '@/lib/content';
 import { HERO_IMAGES, imgUrl, getImagesForSection } from '@/lib/images';
 import { listActiveNotices } from '@/lib/db';
 import { NoticeTicker } from '@/components/site/NoticeTicker';

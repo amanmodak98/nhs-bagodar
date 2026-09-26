@@ -11,6 +11,8 @@ const NAV = [
   { href: '/admin/notices', label: 'Notices & circulars' },
   { href: '/admin/faculty', label: 'Faculty' },
   { href: '/admin/principal', label: 'Principal' },
+  { href: '/admin/facilities', label: 'Facilities' },
+  { href: '/admin/gallery', label: 'Gallery' },
   { href: '/admin/downloads', label: 'Downloads' },
   { href: '/admin/disclosure', label: 'Public disclosure' },
   { href: '/admin/inquiries', label: 'Inquiries' },

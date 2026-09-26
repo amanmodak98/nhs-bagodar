@@ -9,7 +9,18 @@
  * and D1 — no API change when switching to D1 in production.
  */
 
-import type { Notice, Faculty, Disclosure, Inquiry, NoticeCategory, InquiryStatus, Principal } from './types';
+import type {
+  Notice,
+  Faculty,
+  Disclosure,
+  Inquiry,
+  NoticeCategory,
+  InquiryStatus,
+  Principal,
+  Facility,
+  GalleryImage,
+  GalleryCategory,
+} from './types';
 import { SEED_NOTICES, SEED_DISCLOSURES, SEED_INQUIRIES } from './seed';
 
 const HAS_D1 = !!process.env.CLOUDFLARE_D1_DATABASE_ID;
@@ -51,6 +62,14 @@ let idCounter = {
 };
 
 let principalRecord: Principal = { ...DEFAULT_PRINCIPAL };
+
+// Default facilities — used only as the in-memory placeholder until the
+// admin populates them via /admin/facilities. Same model as faculty.
+let facilities: Facility[] = [];
+
+// Default gallery — empty until the seed migration or the admin populates
+// rows via /admin/gallery.
+let galleryImages: GalleryImage[] = [];
 
 /* ------------------------------ Notices ------------------------------ */
 
@@ -322,4 +341,121 @@ export async function upsertPrincipal(input: Omit<Principal, 'id' | 'updatedAt'>
     quote3Hi: input.quote3Hi ?? null,
     updatedAt: new Date().toISOString(),
   };
+}
+
+/* ------------------------------ Facilities ------------------------------ */
+
+export async function listFacilities(): Promise<Facility[]> {
+  if (HAS_D1) {
+    return d1Query<Facility>(
+      "SELECT id, name, name_hi as nameHi, description, description_hi as descriptionHi, image_stem as imageStem, image_url as imageUrl, established, order_index as orderIndex, updated_at as updatedAt FROM facilities ORDER BY order_index ASC, id ASC"
+    );
+  }
+  return [...facilities].sort((a, b) => a.orderIndex - b.orderIndex);
+}
+
+export async function upsertFacility(input: Facility): Promise<void> {
+  if (HAS_D1) {
+    await d1Execute(
+      `INSERT INTO facilities (
+        id, name, name_hi, description, description_hi, image_stem, image_url, established, order_index, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      ON CONFLICT(id) DO UPDATE SET
+        name = excluded.name,
+        name_hi = excluded.name_hi,
+        description = excluded.description,
+        description_hi = excluded.description_hi,
+        image_stem = excluded.image_stem,
+        image_url = excluded.image_url,
+        established = excluded.established,
+        order_index = excluded.order_index,
+        updated_at = datetime('now')`,
+      [
+        input.id,
+        input.name,
+        input.nameHi ?? null,
+        input.description,
+        input.descriptionHi ?? null,
+        input.imageStem ?? null,
+        input.imageUrl ?? null,
+        input.established ?? null,
+        Number(input.orderIndex) || 0,
+      ],
+    );
+    return;
+  }
+  const idx = facilities.findIndex((f) => f.id === input.id);
+  facilities = idx === -1
+    ? [...facilities, { ...input, updatedAt: new Date().toISOString() }]
+    : facilities.map((f, i) => (i === idx ? { ...input, updatedAt: new Date().toISOString() } : f));
+}
+
+export async function deleteFacility(id: string): Promise<void> {
+  if (HAS_D1) {
+    await d1Execute("DELETE FROM facilities WHERE id = ?", [id]);
+    return;
+  }
+  facilities = facilities.filter((f) => f.id !== id);
+}
+
+/* ------------------------------ Gallery ------------------------------ */
+
+export async function listGallery(opts: { onlyPublished?: boolean } = {}): Promise<GalleryImage[]> {
+  if (HAS_D1) {
+    const where = opts.onlyPublished ? "WHERE is_published = 1" : "";
+    return d1Query<GalleryImage>(
+      `SELECT id, stem, r2_key as r2Key, category, caption, caption_hi as captionHi, is_published as isPublished, order_index as orderIndex, created_at as createdAt, updated_at as updatedAt FROM gallery_images ${where} ORDER BY category ASC, order_index ASC, stem ASC`
+    );
+  }
+  const list = opts.onlyPublished ? galleryImages.filter((g) => g.isPublished) : galleryImages;
+  return [...list].sort((a, b) => {
+    if (a.category !== b.category) return a.category.localeCompare(b.category);
+    if (a.orderIndex !== b.orderIndex) return a.orderIndex - b.orderIndex;
+    return a.stem.localeCompare(b.stem);
+  });
+}
+
+export async function upsertGalleryImage(input: GalleryImage): Promise<void> {
+  const isPublished = input.isPublished ? 1 : 0;
+  if (HAS_D1) {
+    await d1Execute(
+      `INSERT INTO gallery_images (stem, r2_key, category, caption, caption_hi, is_published, order_index, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+       ON CONFLICT(stem) DO UPDATE SET
+         r2_key = excluded.r2_key,
+         category = excluded.category,
+         caption = excluded.caption,
+         caption_hi = excluded.caption_hi,
+         is_published = excluded.is_published,
+         order_index = excluded.order_index,
+         updated_at = datetime('now')`,
+      [
+        input.stem,
+        input.r2Key ?? null,
+        input.category,
+        input.caption,
+        input.captionHi ?? null,
+        isPublished,
+        Number(input.orderIndex) || 0,
+      ],
+    );
+    return;
+  }
+  const idx = galleryImages.findIndex((g) => g.stem === input.stem);
+  const next: GalleryImage = { ...input, updatedAt: new Date().toISOString() };
+  galleryImages = idx === -1
+    ? [...galleryImages, next]
+    : galleryImages.map((g, i) => (i === idx ? next : g));
+}
+
+export async function deleteGalleryImage(stem: string): Promise<void> {
+  if (HAS_D1) {
+    await d1Execute("DELETE FROM gallery_images WHERE stem = ?", [stem]);
+    return;
+  }
+  galleryImages = galleryImages.filter((g) => g.stem !== stem);
+}
+
+export async function getGalleryCategories(): Promise<GalleryCategory[]> {
+  return ['independence-day', 'annual-function', 'flag-ceremony', 'leadership', 'life-at-nhs'];
 }

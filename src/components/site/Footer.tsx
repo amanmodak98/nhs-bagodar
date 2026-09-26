@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { SCHOOL, FACILITIES } from '@/lib/content';
+import { SCHOOL } from '@/lib/content';
 import { Logo } from '@/components/ui/Logo';
 
 export function Footer() {
